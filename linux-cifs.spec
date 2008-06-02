@@ -84,6 +84,7 @@ patch -s -p1 -d  %intdir <%name-shared-%version.patch
 
 %install
 #export KBUILD_VERBOSE=1
+export DEFINES="CONFIG_CIFS_UPCALL=y CONFIG_CIFS_DFS_UPCALL=y"
 MAN_DIR=%buildroot%_mandir/ INIT_DIR=%buildroot%_initdir/ SBIN_DIR=%buildroot%_sbindir/ \
 	INSTALL_MOD_PATH=%buildroot/lib/modules BUILDDIR=`pwd`/%intdir  \
 	DESTDIR=%buildroot SRC_DIR=%_usrsrc/%name-%version ./build.sh

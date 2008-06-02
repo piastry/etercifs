@@ -72,7 +72,7 @@ for KERNEL_SOURCE in `echo $BASE_KERNEL_SOURCES_DIR` ; do
 
 	# Clean, build and check
 	make $USEGCC -C $KERNEL_SOURCE here=$BUILDDIR SUBDIRS=$BUILDDIR clean
-	make $USEGCC -C $KERNEL_SOURCE here=$BUILDDIR SUBDIRS=$BUILDDIR modules $MAKESMP
+	make $USEGCC $DEFINES -C $KERNEL_SOURCE here=$BUILDDIR SUBDIRS=$BUILDDIR modules $MAKESMP
 	#[ "$KERVER" = "2.4" ] && MODULENAME=$(echo $MODULENAME.o) || MODULENAME=$(echo $MODULENAME.?o)
 	[ "$KERVER" = "2.4" ] && MODULEFILENAME=$MODULEFILENAME.o || MODULEFILENAME=$MODULENAME.ko
 	test -r "$BUILDDIR/$MODULEFILENAME" || { echo "can't locate built module $MODULEFILENAME, continue" ; continue ; }
