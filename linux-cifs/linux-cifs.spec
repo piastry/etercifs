@@ -12,7 +12,7 @@
 # 	kernel-source-XXXX for Slackware / MOPSLinux
 
 Name: linux-cifs
-Version: 1.50c
+Version: 1.53
 Release: alt4
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension

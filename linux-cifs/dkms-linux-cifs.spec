@@ -1,7 +1,7 @@
 %define modname	linux-cifs
 
 Name: dkms-linux-cifs
-Version: 1.50c
+Version: 1.53
 Release: alt1
 Summary: DKMS-ready CIFS Linux kernel module with Etersoft extensions
 License: GPL
