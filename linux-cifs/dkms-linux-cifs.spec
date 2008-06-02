@@ -59,6 +59,9 @@ fi
 %_usrsrc/%modname-%version/dkms.conf
 
 %changelog
+* Mon Jun 02 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.53-alt1
+- update to 1.53
+
 * Sat Jan 26 2008 Vitaly Lipatov <lav@altlinux.ru> 1.50c-alt1
 - initial build for Korinf project
 

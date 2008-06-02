@@ -1,0 +1,103 @@
+diff --git a/new-cifs-backport/cifs_dfs_ref.c b/new-cifs-backport/cifs_dfs_ref.c
+index d82374c..21d7814 100644
+--- a/new-cifs-backport/cifs_dfs_ref.c
++++ b/new-cifs-backport/cifs_dfs_ref.c
+@@ -17,6 +17,7 @@
+ #include <linux/namei.h>
+ #include <linux/vfs.h>
+ #include <linux/fs.h>
++#include <linux/version.h>
+ #include "cifsglob.h"
+ #include "cifsproto.h"
+ #include "cifsfs.h"
+@@ -226,19 +226,35 @@ static int add_mount_helper(struct vfsmount *newmnt, struct nameidata *nd,
+ 	int err;
+ 
+ 	mntget(newmnt);
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 	err = do_add_mount(newmnt, nd, nd->path.mnt->mnt_flags, mntlist);
++#else
++	err = do_add_mount(newmnt, nd, nd->mnt->mnt_flags, mntlist);
++#endif
+ 	switch (err) {
+ 	case 0:
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 		path_put(&nd->path);
+ 		nd->path.mnt = newmnt;
+ 		nd->path.dentry = dget(newmnt->mnt_root);
++#else
++		dput(nd->dentry);
++		mntput(nd->mnt);
++		nd->mnt = newmnt;
++		nd->dentry = dget(newmnt->mnt_root);
++#endif
+ 		schedule_delayed_work(&cifs_dfs_automount_task,
+ 				      cifs_dfs_mountpoint_expiry_timeout);
+ 		break;
+ 	case -EBUSY:
+ 		/* someone else made a mount here whilst we were busy */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 		while (d_mountpoint(nd->path.dentry) &&
+ 		       follow_down(&nd->path.mnt, &nd->path.dentry))
++#else
++		while (d_mountpoint(nd->dentry) &&
++		       follow_down(&nd->mnt, &nd->dentry))
++#endif
+ 			;
+ 		err = 0;
+ 	default:
+@@ -275,8 +291,13 @@ cifs_dfs_follow_mountpoint(struct dentry *dentry, struct nameidata *nd)
+ 
+ 	xid = GetXid();
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 	dput(nd->path.dentry);
+ 	nd->path.dentry = dget(dentry);
++#else
++	dput(nd->dentry);
++	nd->dentry = dget(dentry);
++#endif
+ 
+ 	cifs_sb = CIFS_SB(dentry->d_inode->i_sb);
+ 	ses = cifs_sb->tcon->ses;
+@@ -308,9 +329,15 @@ cifs_dfs_follow_mountpoint(struct dentry *dentry, struct nameidata *nd)
+ 				rc = -EINVAL;
+ 				goto out_err;
+ 			}
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 			mnt = cifs_dfs_do_refmount(nd->path.mnt,
+ 						nd->path.dentry,
+ 						referrals[i].node_name);
++#else
++			mnt = cifs_dfs_do_refmount(nd->mnt,
++						nd->dentry,
++						referrals[i].node_name);
++#endif
+ 			cFYI(1, ("%s: cifs_dfs_do_refmount:%s , mnt:%p",
+ 					 __func__,
+ 					referrals[i].node_name, mnt));
+@@ -326,7 +353,11 @@ cifs_dfs_follow_mountpoint(struct dentry *dentry, struct nameidata *nd)
+ 	if (IS_ERR(mnt))
+ 		goto out_err;
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 	nd->path.mnt->mnt_flags |= MNT_SHRINKABLE;
++#else
++	nd->mnt->mnt_flags |= MNT_SHRINKABLE;
++#endif
+ 	rc = add_mount_helper(mnt, nd, &cifs_dfs_automount_list);
+ 
+ out:
+@@ -336,7 +367,12 @@ out:
+ 	cFYI(1, ("leaving %s" , __func__));
+ 	return ERR_PTR(rc);
+ out_err:
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+ 	path_put(&nd->path);
++#else
++	dput(nd->dentry);
++	mntput(nd->mnt);
++#endif
+ 	goto out;
+ }
+ 

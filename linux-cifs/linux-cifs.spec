@@ -13,7 +13,7 @@
 
 Name: linux-cifs
 Version: 1.53
-Release: alt4
+Release: alt1
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 

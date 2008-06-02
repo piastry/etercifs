@@ -5,7 +5,7 @@ inherit eutils flag-o-matic multilib
 
 DESCRIPTION="Advanced Common Internet File System for Linux with Etersoft extension"
 HOMEPAGE="http://etersoft.ru/wine"
-CIFSVER=1.50c
+CIFSVER=1.53
 WINENUMVERSION=1.0.8
 SRC_URI="ftp://updates.etersoft.ru/pub/Etersoft/WINE@Etersoft-$WINENUMVERSION/sources/tarball/${P}.tar.bz2
 ftp://updates.etersoft.ru/pub/Etersoft/WINE@Etersoft-$WINENUMVERSION/sources/tarball/cifs-$CIFSVER.tar.bz2"
@@ -24,7 +24,8 @@ src_unpack() {
 	unpack ${A}
 	cd "${WORKDIR}/${P}" || die
 	mv ../new-cifs-backport ./ || die
-	patch -p1 -d new-cifs-backport/ <linux-cifs-shared-1.50c.patch || die
+	patch -p1 -d new-cifs-backport/ <linux-cifs-shared-1.53.patch || die
+	patch -p1 -d new-cifs-backport/ <linux-cifs-upcall-1.53.patch || die
 }
 
 config_cache() {

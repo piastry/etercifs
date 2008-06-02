@@ -81,10 +81,12 @@ This package has Etersoft's patches for WINE@Etersoft sharing access support.
 %setup -q
 tar xfj %SOURCE1
 patch -s -p1 -d  %intdir <%name-shared-%version.patch
+patch -s -p2 -d  %intdir <%name-upcall-%version.patch
 
 %install
 #export KBUILD_VERBOSE=1
 export DEFINES="CONFIG_CIFS_UPCALL=y CONFIG_CIFS_DFS_UPCALL=y"
+echo EXTRA_CFLAGS=-DCONFIG_CIFS_UPCALL=y -DCONFIG_CIFS_DFS_UPCALL=y >> %intdir/Makefile
 MAN_DIR=%buildroot%_mandir/ INIT_DIR=%buildroot%_initdir/ SBIN_DIR=%buildroot%_sbindir/ \
 	INSTALL_MOD_PATH=%buildroot/lib/modules BUILDDIR=`pwd`/%intdir  \
 	DESTDIR=%buildroot SRC_DIR=%_usrsrc/%name-%version ./build.sh
