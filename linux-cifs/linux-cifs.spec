@@ -13,7 +13,7 @@
 
 Name: linux-cifs
 Version: 1.53
-Release: alt1
+Release: alt2
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -102,6 +102,13 @@ MAN_DIR=%buildroot%_mandir/ INIT_DIR=%buildroot%_initdir/ SBIN_DIR=%buildroot%_s
 %_usrsrc/%name-%version/
 
 %changelog
+* Mon Jun 02 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.53-alt2
+- Enabled CONFIG_CIFS_UPCALL and CONFIG_CIFS_DFS_UPCALL build options
+
+* Mon Jun 02 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.53-alt1
+- Updated from kernel cifs-2.6 branch
+- Adopted cifs code for kernels less than 2.6.25
+
 * Thu Jan 31 2008 Vitaly Lipatov <lav@altlinux.ru> 1.50c-alt4
 - fix build on Fedora 8 (2.6.18-53)
 

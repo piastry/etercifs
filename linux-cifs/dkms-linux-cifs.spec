@@ -2,7 +2,7 @@
 
 Name: dkms-linux-cifs
 Version: 1.53
-Release: alt1
+Release: alt2
 Summary: DKMS-ready CIFS Linux kernel module with Etersoft extensions
 License: GPL
 Packager: Vitaly Lipatov <lav@altlinux.ru>
@@ -59,6 +59,9 @@ fi
 %_usrsrc/%modname-%version/dkms.conf
 
 %changelog
+* Mon Jun 02 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.53-alt2
+- add upcall support
+
 * Mon Jun 02 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.53-alt1
 - update to 1.53
 
