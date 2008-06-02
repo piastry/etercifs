@@ -1,7 +1,7 @@
 /*
  *   fs/cifs/link.c
  *
- *   Copyright (C) International Business Machines  Corp., 2002,2003
+ *   Copyright (C) International Business Machines  Corp., 2002,2008
  *   Author(s): Steve French (sfrench@us.ibm.com)
  *
  *   This library is free software; you can redistribute it and/or modify
@@ -20,10 +20,7 @@
  */
 #include <linux/fs.h>
 #include <linux/stat.h>
-#include <linux/version.h>
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,5,0)
 #include <linux/namei.h>
-#endif
 #include "cifsfs.h"
 #include "cifspdu.h"
 #include "cifsglob.h"
@@ -105,13 +102,9 @@ cifs_hl_exit:
 	FreeXid(xid);
 	return rc;
 }
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,12)
+
 void *
 cifs_follow_link(struct dentry *direntry, struct nameidata *nd)
-#else
-int
-cifs_follow_link(struct dentry *direntry, struct nameidata *nd)
-#endif
 {
 	struct inode *inode = direntry->d_inode;
 	int rc = -EACCES;
@@ -160,9 +153,6 @@ cifs_follow_link(struct dentry *direntry, struct nameidata *nd)
 /* BB Add special case check for Samba DFS symlinks */
 
 		target_path[PATH_MAX-1] = 0;
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,9) 
-		rc = vfs_follow_link(nd, target_path);
-#endif
 	} else {
 		kfree(target_path);
 		target_path = ERR_PTR(rc);
@@ -172,14 +162,8 @@ out:
 	kfree(full_path);
 out_no_free:
 	FreeXid(xid);
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,8) 
 	nd_set_link(nd, target_path);
-#endif
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,12)
 	return NULL;	/* No cookie */
-#else
-	return 0;
-#endif
 }
 
 int
@@ -221,7 +205,7 @@ cifs_symlink(struct inode *inode, struct dentry *direntry, const char *symname)
 						      inode->i_sb, xid);
 		else
 			rc = cifs_get_inode_info(&newinode, full_path, NULL,
-						 inode->i_sb, xid);
+						 inode->i_sb, xid, NULL);
 
 		if (rc != 0) {
 			cFYI(1, ("Create symlink ok, getinodeinfo fail rc = %d",
@@ -246,14 +230,11 @@ cifs_readlink(struct dentry *direntry, char __user *pBuffer, int buflen)
 	struct inode *inode = direntry->d_inode;
 	int rc = -EACCES;
 	int xid;
-	int oplock = FALSE;
+	int oplock = 0;
 	struct cifs_sb_info *cifs_sb;
 	struct cifsTconInfo *pTcon;
 	char *full_path = NULL;
-	char *tmp_path = NULL;
 	char *tmpbuffer;
-	unsigned char *referrals = NULL;
-	unsigned int num_referrals = 0;
 	int len;
 	__u16 fid;
 
@@ -313,43 +294,9 @@ cifs_readlink(struct dentry *direntry, char __user *pBuffer, int buflen)
 				cFYI(1, ("Error closing junction point "
 					 "(open for ioctl)"));
 			}
-			if (rc == -EIO) {
-				/* Query if DFS Junction */
-				tmp_path =
-					kmalloc(MAX_TREE_SIZE + MAX_PATHCONF + 1,
-						GFP_KERNEL);
-				if (tmp_path) {
-					strncpy(tmp_path, pTcon->treeName,
-						MAX_TREE_SIZE);
-					strncat(tmp_path, full_path,
-						MAX_PATHCONF);
-					rc = get_dfs_path(xid, pTcon->ses,
-						tmp_path,
-						cifs_sb->local_nls,
-						&num_referrals, &referrals,
-						cifs_sb->mnt_cifs_flags &
-						    CIFS_MOUNT_MAP_SPECIAL_CHR);
-					cFYI(1, ("Get DFS for %s rc = %d ",
-						tmp_path, rc));
-					if ((num_referrals == 0) && (rc == 0))
-						rc = -EACCES;
-					else {
-						cFYI(1, ("num referral: %d",
-							num_referrals));
-						if (referrals) {
-							cFYI(1,("referral string: %s", referrals));
-							strncpy(tmpbuffer,
-								referrals,
-								len-1);
-						}
-					}
-					kfree(referrals);
-					kfree(tmp_path);
-}
-				/* BB add code like else decode referrals
-				then memcpy to tmpbuffer and free referrals
-				string array BB */
-			}
+			/* If it is a DFS junction earlier we would have gotten
+			   PATH_NOT_COVERED returned from server so we do
+			   not need to request the DFS info here */
 		}
 	}
 	/* BB Anything else to do to handle recursive links? */
@@ -369,15 +316,9 @@ cifs_readlink(struct dentry *direntry, char __user *pBuffer, int buflen)
 	return rc;
 }
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,12)
 void cifs_put_link(struct dentry *direntry, struct nameidata *nd, void *cookie)
-#else
-void cifs_put_link(struct dentry *direntry, struct nameidata *nd)
-#endif
 {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,8)
 	char *p = nd_get_link(nd);
 	if (!IS_ERR(p))
 		kfree(p);
-#endif
 }

@@ -29,19 +29,10 @@
 #include "cifsfs.h"
 
 #define CIFS_IOC_CHECKUMOUNT _IO(0xCF, 2)
-#ifndef FS_IOC_GETFLAGS
-#define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
-#endif
-#ifndef FS_IOC_SETFLAGS
-#define FS_IOC_SETFLAGS                 _IOW('f', 2, long)
-#endif
-#ifndef FS_FL_USER_VISIBLE
-#define FS_FL_USER_VISIBLE              0x0003DFFF /* User visible flags */
-#endif
 
-int cifs_ioctl (struct inode *inode, struct file *filep,
-		unsigned int command, unsigned long arg)
+long cifs_ioctl(struct file *filep, unsigned int command, unsigned long arg)
 {
+	struct inode *inode = filep->f_dentry->d_inode;
 	int rc = -ENOTTY; /* strange error - but the precedent */
 	int xid;
 	struct cifs_sb_info *cifs_sb;

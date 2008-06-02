@@ -58,15 +58,6 @@ extern signed char UniLowerTable[512];
 extern struct UniCaseRange UniLowerRange[];
 #endif				/* UNIUPR_NOLOWER */
 
-#ifndef __le16
-#define __le16 __u16
-#define __le32 __u32
-#define __le64 __u64
-#define __be16 __u16
-#define __be32 __u32
-#define __be64 __u64
-#endif
-
 #ifdef __KERNEL__
 int cifs_strfromUCS_le(char *, const __le16 *, int, const struct nls_table *);
 int cifs_strtoUCS(__le16 *, const char *, int, const struct nls_table *);
@@ -263,7 +254,8 @@ UniStrstr(const wchar_t *ucs1, const wchar_t *ucs2)
 	const wchar_t *anchor2 = ucs2;
 
 	while (*ucs1) {
-		if (*ucs1 == *ucs2) {	/* Partial match found */
+		if (*ucs1 == *ucs2) {
+			/* Partial match found */
 			ucs1++;
 			ucs2++;
 		} else {
@@ -288,7 +280,8 @@ UniToupper(register wchar_t uc)
 {
 	register const struct UniCaseRange *rp;
 
-	if (uc < sizeof (CifsUniUpperTable)) {	/* Latin characters */
+	if (uc < sizeof(CifsUniUpperTable)) {
+		/* Latin characters */
 		return uc + CifsUniUpperTable[uc];	/* Use base tables */
 	} else {
 		rp = CifsUniUpperRange;	/* Use range tables */
@@ -329,7 +322,8 @@ UniTolower(wchar_t uc)
 {
 	register struct UniCaseRange *rp;
 
-	if (uc < sizeof (UniLowerTable)) {	/* Latin characters */
+	if (uc < sizeof(UniLowerTable)) {
+		/* Latin characters */
 		return uc + UniLowerTable[uc];	/* Use base tables */
 	} else {
 		rp = UniLowerRange;	/* Use range tables */
