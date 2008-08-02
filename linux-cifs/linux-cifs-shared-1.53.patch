@@ -472,3 +472,36 @@ index 63f6440..7c9f495 100644
  				OPEN_REPARSE_POINT, &fid, &oplock, NULL,
  				cifs_sb->local_nls,
  				cifs_sb->mnt_cifs_flags &
+diff -Nu old/cifsacl.c new/cifsacl.c
+--- old/cifsacl.c	2008-06-02 18:29:25 +0400
++++ new/cifsacl.c	2008-07-30 21:18:59 +0400
+@@ -592,7 +592,7 @@
+ 		int oplock = 0;
+ 		/* open file */
+ 		rc = CIFSSMBOpen(xid, cifs_sb->tcon, path, FILE_OPEN,
+-				READ_CONTROL, 0, &fid, &oplock, NULL,
++				READ_CONTROL, FILE_SHARE_ALL, 0, &fid, &oplock, NULL,
+ 				cifs_sb->local_nls, cifs_sb->mnt_cifs_flags &
+ 					CIFS_MOUNT_MAP_SPECIAL_CHR);
+ 		if (rc != 0) {
+@@ -646,7 +646,7 @@
+ 		int oplock = 0;
+ 		/* open file */
+ 		rc = CIFSSMBOpen(xid, cifs_sb->tcon, path, FILE_OPEN,
+-				WRITE_DAC, 0, &fid, &oplock, NULL,
++				WRITE_DAC, FILE_SHARE_ALL, 0, &fid, &oplock, NULL,
+ 				cifs_sb->local_nls, cifs_sb->mnt_cifs_flags &
+ 					CIFS_MOUNT_MAP_SPECIAL_CHR);
+ 		if (rc != 0) {
+diff -Nu old/xattr.c new/xattr.c
+--- old/xattr.c	2008-07-30 21:04:27 +0400
++++ new/xattr.c	2008-07-30 21:04:08 +0400
+@@ -269,7 +269,7 @@
+ 			__u32 buflen = 0;
+ 			if (experimEnabled)
+ 				rc = CIFSSMBOpen(xid, pTcon, full_path,
+-					FILE_OPEN, GENERIC_READ, 0, &fid,
++					FILE_OPEN, GENERIC_READ, FILE_SHARE_ALL, 0, &fid,
+ 					&oplock, NULL, cifs_sb->local_nls,
+ 					cifs_sb->mnt_cifs_flags &
+ 					CIFS_MOUNT_MAP_SPECIAL_CHR);
