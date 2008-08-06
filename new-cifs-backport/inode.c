@@ -737,7 +737,7 @@ psx_del_no_retry:
 			/* ATTRS set to normal clears r/o bit */
 			pinfo_buf->Attributes = cpu_to_le32(ATTR_NORMAL);
 			if (!(pTcon->ses->flags & CIFS_SES_NT4))
-				rc = CIFSSMBSetTimes(xid, pTcon, full_path,
+				rc = CIFSSMBSetPathInfo(xid, pTcon, full_path,
 						     pinfo_buf,
 						     cifs_sb->local_nls,
 						     cifs_sb->mnt_cifs_flags &
@@ -767,9 +767,10 @@ psx_del_no_retry:
 						 cifs_sb->mnt_cifs_flags &
 						    CIFS_MOUNT_MAP_SPECIAL_CHR);
 				if (rc == 0) {
-					rc = CIFSSMBSetFileTimes(xid, pTcon,
-								 pinfo_buf,
-								 netfid);
+					rc = CIFSSMBSetFileInfo(xid, pTcon,
+								pinfo_buf,
+								netfid,
+								current->tgid);
 					CIFSSMBClose(xid, pTcon, netfid);
 				}
 			}
@@ -984,32 +985,41 @@ mkdir_get_info:
 		  * failed to get it from the server or was set bogus */
 		if ((direntry->d_inode) && (direntry->d_inode->i_nlink < 2))
 				direntry->d_inode->i_nlink = 2;
+
 		mode &= ~current->fs->umask;
+		/* must turn on setgid bit if parent dir has it */
+		if (inode->i_mode & S_ISGID)
+			mode |= S_ISGID;
+
 		if (pTcon->unix_ext) {
+			struct cifs_unix_set_info_args args = {
+				.mode	= mode,
+				.ctime	= NO_CHANGE_64,
+				.atime	= NO_CHANGE_64,
+				.mtime	= NO_CHANGE_64,
+				.device	= 0,
+			};
 			if (cifs_sb->mnt_cifs_flags & CIFS_MOUNT_SET_UID) {
-				CIFSSMBUnixSetPerms(xid, pTcon, full_path,
-						    mode,
-						    (__u64)current->fsuid,
-						    (__u64)current->fsgid,
-						    0 /* dev_t */,
-						    cifs_sb->local_nls,
-						    cifs_sb->mnt_cifs_flags &
-						    CIFS_MOUNT_MAP_SPECIAL_CHR);
+				args.uid = (__u64)current->fsuid;
+				if (inode->i_mode & S_ISGID)
+					args.gid = (__u64)inode->i_gid;
+				else
+					args.gid = (__u64)current->fsgid;
 			} else {
-				CIFSSMBUnixSetPerms(xid, pTcon, full_path,
-						    mode, (__u64)-1,
-						    (__u64)-1, 0 /* dev_t */,
-						    cifs_sb->local_nls,
-						    cifs_sb->mnt_cifs_flags &
-						    CIFS_MOUNT_MAP_SPECIAL_CHR);
+				args.uid = NO_CHANGE_64;
+				args.gid = NO_CHANGE_64;
 			}
+			CIFSSMBUnixSetInfo(xid, pTcon, full_path, &args,
+					    cifs_sb->local_nls,
+					    cifs_sb->mnt_cifs_flags &
+					    CIFS_MOUNT_MAP_SPECIAL_CHR);
 		} else {
 			if (!(cifs_sb->mnt_cifs_flags & CIFS_MOUNT_CIFS_ACL) &&
 			    (mode & S_IWUGO) == 0) {
 				FILE_BASIC_INFO pInfo;
 				memset(&pInfo, 0, sizeof(pInfo));
 				pInfo.Attributes = cpu_to_le32(ATTR_READONLY);
-				CIFSSMBSetTimes(xid, pTcon, full_path,
+				CIFSSMBSetPathInfo(xid, pTcon, full_path,
 						&pInfo, cifs_sb->local_nls,
 						cifs_sb->mnt_cifs_flags &
 						CIFS_MOUNT_MAP_SPECIAL_CHR);
@@ -1024,8 +1034,12 @@ mkdir_get_info:
 				     CIFS_MOUNT_SET_UID) {
 					direntry->d_inode->i_uid =
 						current->fsuid;
-					direntry->d_inode->i_gid =
-						current->fsgid;
+					if (inode->i_mode & S_ISGID)
+						direntry->d_inode->i_gid =
+							inode->i_gid;
+					else
+						direntry->d_inode->i_gid =
+							current->fsgid;
 				}
 			}
 		}
@@ -1310,10 +1324,11 @@ int cifs_revalidate(struct dentry *direntry)
 /*		if (S_ISDIR(direntry->d_inode->i_mode))
 			shrink_dcache_parent(direntry); */
 		if (S_ISREG(direntry->d_inode->i_mode)) {
-			if (direntry->d_inode->i_mapping)
+			if (direntry->d_inode->i_mapping) {
 				wbrc = filemap_fdatawait(direntry->d_inode->i_mapping);
 				if (wbrc)
 					CIFS_I(direntry->d_inode)->write_behind_rc = wbrc;
+			}
 			/* may eventually have to do this for open files too */
 			if (list_empty(&(cifsInode->openFileList))) {
 				/* changed on server - flush read ahead pages */
@@ -1499,9 +1514,9 @@ int cifs_setattr(struct dentry *direntry, struct iattr *attrs)
 	FILE_BASIC_INFO time_buf;
 	bool set_time = false;
 	bool set_dosattr = false;
-	__u64 mode = 0xFFFFFFFFFFFFFFFFULL;
-	__u64 uid = 0xFFFFFFFFFFFFFFFFULL;
-	__u64 gid = 0xFFFFFFFFFFFFFFFFULL;
+	__u64 mode = NO_CHANGE_64;
+	__u64 uid = NO_CHANGE_64;
+	__u64 gid = NO_CHANGE_64;
 	struct cifsInodeInfo *cifsInode;
 	struct inode *inode = direntry->d_inode;
 
@@ -1585,12 +1600,21 @@ int cifs_setattr(struct dentry *direntry, struct iattr *attrs)
 	}
 
 	if ((pTcon->unix_ext)
-	    && (attrs->ia_valid & (ATTR_MODE | ATTR_GID | ATTR_UID)))
-		rc = CIFSSMBUnixSetPerms(xid, pTcon, full_path, mode, uid, gid,
-					 0 /* dev_t */, cifs_sb->local_nls,
-					 cifs_sb->mnt_cifs_flags &
+	    && (attrs->ia_valid & (ATTR_MODE | ATTR_GID | ATTR_UID))) {
+		struct cifs_unix_set_info_args args = {
+			.mode	= mode,
+			.uid	= uid,
+			.gid	= gid,
+			.ctime	= NO_CHANGE_64,
+			.atime	= NO_CHANGE_64,
+			.mtime	= NO_CHANGE_64,
+			.device	= 0,
+		};
+		rc = CIFSSMBUnixSetInfo(xid, pTcon, full_path, &args,
+					cifs_sb->local_nls,
+					cifs_sb->mnt_cifs_flags &
 						CIFS_MOUNT_MAP_SPECIAL_CHR);
-	else if (attrs->ia_valid & ATTR_MODE) {
+	} else if (attrs->ia_valid & ATTR_MODE) {
 		rc = 0;
 #ifdef CONFIG_CIFS_EXPERIMENTAL
 		if (cifs_sb->mnt_cifs_flags & CIFS_MOUNT_CIFS_ACL)
@@ -1669,8 +1693,8 @@ int cifs_setattr(struct dentry *direntry, struct iattr *attrs)
 		/* In the future we should experiment - try setting timestamps
 		   via Handle (SetFileInfo) instead of by path */
 		if (!(pTcon->ses->flags & CIFS_SES_NT4))
-			rc = CIFSSMBSetTimes(xid, pTcon, full_path, &time_buf,
-					     cifs_sb->local_nls,
+			rc = CIFSSMBSetPathInfo(xid, pTcon, full_path,
+					     &time_buf, cifs_sb->local_nls,
 					     cifs_sb->mnt_cifs_flags &
 						CIFS_MOUNT_MAP_SPECIAL_CHR);
 		else
@@ -1691,8 +1715,8 @@ int cifs_setattr(struct dentry *direntry, struct iattr *attrs)
 					 cifs_sb->mnt_cifs_flags &
 						CIFS_MOUNT_MAP_SPECIAL_CHR);
 			if (rc == 0) {
-				rc = CIFSSMBSetFileTimes(xid, pTcon, &time_buf,
-							 netfid);
+				rc = CIFSSMBSetFileInfo(xid, pTcon, &time_buf,
+							 netfid, current->tgid);
 				CIFSSMBClose(xid, pTcon, netfid);
 			} else {
 			/* BB For even older servers we could convert time_buf
