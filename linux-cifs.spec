@@ -12,8 +12,8 @@
 # 	kernel-source-XXXX for Slackware / MOPSLinux
 
 Name: linux-cifs
-Version: 1.53
-Release: alt6
+Version: 1.54
+Release: alt1
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -81,7 +81,7 @@ This package has Etersoft's patches for WINE@Etersoft sharing access support.
 %setup -q
 tar xfj %SOURCE1
 patch -s -p1 -d  %intdir <%name-shared-%version.patch
-patch -s -p2 -d  %intdir <%name-upcall-%version.patch
+patch -s -p2 -d  %intdir <%name-upcall-1.53.patch
 
 %install
 #export KBUILD_VERBOSE=1
@@ -105,6 +105,10 @@ MAN_DIR=%buildroot%_mandir/ INIT_DIR=%buildroot%_initdir/ SBIN_DIR=%buildroot%_s
 %_usrsrc/%name-%version/
 
 %changelog
+* Wed Aug 06 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.54-alt1
+- Updated from kernel cifs-2.6 branch to 1.54
+- Adopted cifs code for kernels less than 2.6.26
+
 * Sat Aug 02 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.53-alt6
 - Added fixes from upstream
 
