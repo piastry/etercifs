@@ -2,7 +2,7 @@ diff --git a/Makefile b/Makefile
 index 6ba43fb..77a14ee 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1,13 +1,13 @@
+@@ -1,13 +1,14 @@
  #
  # Makefile for Linux CIFS VFS client 
  #
@@ -16,10 +16,11 @@ index 6ba43fb..77a14ee 100644
  	  readdir.o ioctl.o sess.o export.o cifsacl.o
  
 -cifs-$(CONFIG_CIFS_UPCALL) += cifs_spnego.o
-+etercifs-$(CONFIG_CIFS_UPCALL) += cifs_spnego.o
++etercifs-y += cifs_spnego.o
  
 -cifs-$(CONFIG_CIFS_DFS_UPCALL) += dns_resolve.o cifs_dfs_ref.o
-+etercifs-$(CONFIG_CIFS_DFS_UPCALL) += dns_resolve.o cifs_dfs_ref.o
++etercifs-y += dns_resolve.o cifs_dfs_ref.o
++EXTRA_CFLAGS=-DCONFIG_CIFS_UPCALL=y -DCONFIG_CIFS_DFS_UPCALL=y
 diff --git a/cifs_debug.c b/cifs_debug.c
 index cc950f6..9ea3219 100644
 --- a/cifs_debug.c

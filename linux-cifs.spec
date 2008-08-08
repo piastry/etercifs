@@ -13,7 +13,7 @@
 
 Name: linux-cifs
 Version: 1.54
-Release: alt1
+Release: alt2
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -85,8 +85,6 @@ patch -s -p2 -d  %intdir <%name-upcall-1.53.patch
 
 %install
 #export KBUILD_VERBOSE=1
-export DEFINES="CONFIG_CIFS_UPCALL=y CONFIG_CIFS_DFS_UPCALL=y"
-echo EXTRA_CFLAGS=-DCONFIG_CIFS_UPCALL=y -DCONFIG_CIFS_DFS_UPCALL=y >> %intdir/Makefile
 MAN_DIR=%buildroot%_mandir/ INIT_DIR=%buildroot%_initdir/ SBIN_DIR=%buildroot%_sbindir/ \
 	INSTALL_MOD_PATH=%buildroot/lib/modules BUILDDIR=`pwd`/%intdir  \
 	DESTDIR=%buildroot SRC_DIR=%_usrsrc/%name-%version ./build.sh
@@ -105,6 +103,9 @@ MAN_DIR=%buildroot%_mandir/ INIT_DIR=%buildroot%_initdir/ SBIN_DIR=%buildroot%_s
 %_usrsrc/%name-%version/
 
 %changelog
+* Fri Aug 08 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.54-alt2
+- Fixed build with CONFIG_CIFS_UPCALL=y and CONFIG_CIFS_DFS_UPCALL=y
+
 * Wed Aug 06 2008 Evgeny Sinelnikov <sin@altlinux.ru> 1.54-alt1
 - Updated from kernel cifs-2.6 branch to 1.54
 - Adopted cifs code for kernels less than 2.6.26
