@@ -24,7 +24,7 @@
 
 Name: etercifs
 Version: 4.3.4
-Release: alt1
+Release: alt0.M41.1
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -127,6 +127,9 @@ install -m755 etermount %buildroot%_sbindir/
 %_sbindir/etermount
 
 %changelog
+* Fri Apr 10 2009 Konstantin Baev <kipruss@altlinux.org> 4.3.4-alt0.M41.1
+- build for 4.1
+
 * Fri Apr 10 2009 Konstantin Baev <kipruss@altlinux.org> 4.3.4-alt1
 - Add etercifs sources for CentOS kernel 2.6.18-128 (fix bug Eter#3770)
 - Add CentOS specific part in building scripts
