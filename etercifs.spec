@@ -26,7 +26,7 @@
 
 Name: etercifs
 Version: 4.3.6
-Release: alt0.M41.1
+Release: alt1.M41.2
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -134,8 +134,11 @@ install -m755 etermount %buildroot%_sbindir/
 %_sbindir/etermount
 
 %changelog
-* Wed Apr 15 2009 Konstantin Baev <kipruss@altlinux.org> 4.3.6-alt0.M41.1
-- build for 4.1
+* Mon May 04 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.6-alt1.M41.2
+- Build for branch 4.1
+
+* Mon May 04 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.6-alt2
+- Rebuild with git.eter builder
 
 * Wed Apr 15 2009 Konstantin Baev <kipruss@altlinux.org> 4.3.6-alt1
 - Revert "use cifs_file_aio_read instead of generic_file_aio_read" in all sources
