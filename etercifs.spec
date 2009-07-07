@@ -26,7 +26,7 @@
 
 Name: etercifs
 Version: 4.3.6
-Release: alt4
+Release: alt5
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -163,6 +163,9 @@ ln -s ../../../../%etercifs_src/%src_package_name-2.6.29-%src_2_6_29_version.tar
 %_usrsrc/kernel/sources/%src_package_name-*-%version.tar.bz2
 
 %changelog
+* Tue Jul 07 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.6-alt5
+- Try to fix #10754 like Eter#4059 for SLES
+
 * Thu Jul 02 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.6-alt4
 - Fixed legacy-1.50c building for 2.6.18 (Eter#4059)
 
