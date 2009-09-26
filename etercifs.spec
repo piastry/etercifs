@@ -1,4 +1,4 @@
-# Etersoft (c) 2007, 2008
+# Etersoft (c) 2007, 2008, 2009
 # Multiplatform spec for autobuild system
 
 # in kernel build dir you can have gcc_version.inc file with export GCC_VERSION=x.xx
@@ -23,10 +23,11 @@
 %define src_2_6_27_version 1.54
 %define src_2_6_28_version 1.55
 %define src_2_6_29_version 1.57
+%define src_2_6_30_version 1.58
 
 Name: etercifs
-Version: 4.3.6
-Release: alt2.M41.3
+Version: 4.3.8
+Release: alt4.M41.5
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -34,11 +35,11 @@ Packager: Konstantin Baev <kipruss@altlinux.org>
 
 License: GPLv2
 Group: System/Kernel and hardware
-Url: ftp://updates.etersoft.ru/pub/Etersoft/CIFS@Etersoft/
+Url: http://wiki.etersoft.ru/etercifs
 
 BuildArch: noarch
 
-Source: %name-%version.tar.bz2
+Source: ftp://updates.etersoft.ru/pub/Etersoft/CIFS@Etersoft/%version/sources/tarball/%name-%version.tar.bz2
 Source1: %src_package_name-legacy-%src_legacy_version.tar.bz2
 Source2: %src_package_name-centos52-%src_centos52_version.tar.bz2
 Source3: %src_package_name-centos53-%src_centos53_version.tar.bz2
@@ -50,6 +51,7 @@ Source26: %src_package_name-2.6.26-%src_2_6_26_version.tar.bz2
 Source27: %src_package_name-2.6.27-%src_2_6_27_version.tar.bz2
 Source28: %src_package_name-2.6.28-%src_2_6_28_version.tar.bz2
 Source29: %src_package_name-2.6.29-%src_2_6_29_version.tar.bz2
+Source30: %src_package_name-2.6.30-%src_2_6_30_version.tar.bz2
 
 Conflicts: linux-cifs
 
@@ -59,6 +61,7 @@ Provides: %src_package_name-2.6.26 = %version-%release
 Provides: %src_package_name-2.6.27 = %version-%release
 Provides: %src_package_name-2.6.28 = %version-%release
 Provides: %src_package_name-2.6.29 = %version-%release
+Provides: %src_package_name-2.6.30 = %version-%release
 
 Obsoletes: %src_package_name-2.6.24
 Obsoletes: %src_package_name-2.6.25
@@ -66,6 +69,8 @@ Obsoletes: %src_package_name-2.6.26
 Obsoletes: %src_package_name-2.6.27
 Obsoletes: %src_package_name-2.6.28
 Obsoletes: %src_package_name-2.6.29
+
+Requires: gcc make
 
 %description
 The CIFS VFS is a virtual file system for Linux to allow access to
@@ -129,6 +134,7 @@ cp %SOURCE26 %buildroot/%etercifs_src/%src_package_name-2.6.26-%src_2_6_26_versi
 cp %SOURCE27 %buildroot/%etercifs_src/%src_package_name-2.6.27-%src_2_6_27_version.tar.bz2
 cp %SOURCE28 %buildroot/%etercifs_src/%src_package_name-2.6.28-%src_2_6_28_version.tar.bz2
 cp %SOURCE29 %buildroot/%etercifs_src/%src_package_name-2.6.29-%src_2_6_29_version.tar.bz2
+cp %SOURCE30 %buildroot/%etercifs_src/%src_package_name-2.6.30-%src_2_6_30_version.tar.bz2
 
 mkdir -p %buildroot%_sbindir
 install -m755 etermount %buildroot%_sbindir/
@@ -146,6 +152,8 @@ ln -s ../../../../%etercifs_src/%src_package_name-2.6.28-%src_2_6_28_version.tar
     %buildroot%_usrsrc/kernel/sources/%src_package_name-2.6.28-%version.tar.bz2
 ln -s ../../../../%etercifs_src/%src_package_name-2.6.29-%src_2_6_29_version.tar.bz2 \
     %buildroot%_usrsrc/kernel/sources/%src_package_name-2.6.29-%version.tar.bz2
+ln -s ../../../../%etercifs_src/%src_package_name-2.6.30-%src_2_6_30_version.tar.bz2 \
+    %buildroot%_usrsrc/kernel/sources/%src_package_name-2.6.30-%version.tar.bz2
 
 %post
 %post_service %name
@@ -163,6 +171,43 @@ ln -s ../../../../%etercifs_src/%src_package_name-2.6.29-%src_2_6_29_version.tar
 %_usrsrc/kernel/sources/%src_package_name-*-%version.tar.bz2
 
 %changelog
+* Sat Sep 26 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.8-alt4.M41.5
+- Build for branch 4.1
+
+* Mon Aug 03 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.8-alt5
+- Fix build with {clear,drop,inc}_nlink() functions.
+- Add bugfixes from upstream for 2.6.30
+
+* Tue Jul 28 2009 Vitaly Lipatov <lav@altlinux.ru> 4.3.8-alt4
+- update README and ChangeLog, fix messages
+
+* Mon Jul 27 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.8-alt3
+- Fix building for legacy code with FALSE using
+- Fix missing definition for 2.6.29
+
+* Mon Jul 27 2009 Vitaly Lipatov <lav@altlinux.ru> 4.3.8-alt2
+- fix messages, fix url and source path
+
+* Mon Jul 27 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.8-alt1
+- Revert fix for POSIX locks behavior during close() using storage_lock
+- Add requries for gcc and make
+
+* Mon Jul 27 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.7-alt4
+- Fix build for 2.6.30
+
+* Sat Jul 25 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.7-alt3
+- Update and fix broken module for 2.6.30
+
+* Tue Jul 07 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.7-alt2
+- Try to fix #10754 like Eter#4059 for SLES
+
+* Fri Jul 03 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.7-alt1
+- Add sources for 2.6.30
+- Add bugfixes from upstream for 2.6.27-2.6.29
+
+* Thu Jul 02 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.6-alt4
+- Fixed legacy-1.50c building for 2.6.18 (Eter#4059)
+
 * Tue May 05 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.6-alt2.M41.3
 - Build for branch 4.1
 
