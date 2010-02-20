@@ -29,7 +29,7 @@
 
 Name: etercifs
 Version: 4.4.3
-Release: alt2
+Release: alt3
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -187,6 +187,9 @@ ln -s ../../../../%etercifs_src/%src_package_name-2.6.31-%src_2_6_31_version.tar
 %_usrsrc/kernel/sources/%src_package_name-*-%version.tar.bz2
 
 %changelog
+* Sat Feb 20 2010 Vitaly Lipatov <lav@altlinux.ru> 4.4.3-alt3
+- merge with git.eter:/gears/e/etercifs.git
+
 * Fri Feb 19 2010 Vitaly Lipatov <lav@altlinux.ru> 4.4.3-alt2
 - cleanup spec, rewrite changelog, add comments to etercifs.conf
 - update README, CHANGES
@@ -214,6 +217,9 @@ ln -s ../../../../%etercifs_src/%src_package_name-2.6.31-%src_2_6_31_version.tar
 * Mon Dec 14 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.4.0-alt2
 - Fixed forcemand open problems for 2.6.30 and 2.6.31
 - Fixed test version of 2.6.31 for build and update
+
+* Tue Nov 10 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.3.9-alt3
+- Fix build and update for 2.6.31
 
 * Tue Oct 27 2009 Evgeny Sinelnikov <sin@altlinux.ru> 4.4.0-alt1
 - Fixed mandatory reading problems
