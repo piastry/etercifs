@@ -1,3 +1,5 @@
+# This spec is backported to ALTLinux 5.1 automatically by rpmbph script. Do not edit it.
+#
 # Etersoft (c) 2007, 2008, 2009, 2010
 # Multiplatform spec for autobuild system
 
@@ -30,7 +32,7 @@
 
 Name: etercifs
 Version: 4.4.4
-Release: alt1
+Release: alt0.M51.1
 
 Summary: Advanced Common Internet File System for Linux with Etersoft extension
 
@@ -193,6 +195,9 @@ ln -s ../../../../%etercifs_src/%src_package_name-2.6.32-%src_2_6_32_version.tar
 %_usrsrc/kernel/sources/%src_package_name-*-%version.tar.bz2
 
 %changelog
+* Wed Feb 24 2010 Vitaly Lipatov <lav@altlinux.ru> 4.4.4-alt0.M51.1
+- backport to ALTLinux 5.1 (by rpmbph script)
+
 * Sun Feb 21 2010 Pavel Shilovsky <piastry@altlinux.org> 4.4.4-alt1
 - Add sources for 2.6.32
 - Update README.ETER, CHANGES and .gear/rules
